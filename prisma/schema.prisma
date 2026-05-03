@@ -12,7 +12,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-
 }
 
 
@@ -87,16 +86,6 @@ model Account {
   @@map("accounts")
 }
  
-// model Session {
-//   id           String   @id @default(cuid())
-//   sessionToken String   @unique @map("session_token")
-//   userId       String   @map("user_id")
-//   expires      DateTime
-//   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-//   @@map("sessions")
-// }
-
-
 
 model User {
   id            String    @id @default(cuid())
@@ -123,7 +112,9 @@ model User {
   updatedAt   DateTime @updatedAt
   mediatorAT  DateTime @default(now())
   @@map("users")
+  @@index([status])
 }
+
 
 model verificationToken {
   id String @id @default(cuid())
@@ -141,7 +132,20 @@ model forgetPassword {
   expires DateTime
 
   @@unique([email,token])
+  @@index([token])
 }
+
+model PushToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  createdAt DateTime @default(now())
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+}
+
 // chat room
 model ChatRoom {
   id          String   @id @default(cuid())
@@ -162,6 +166,7 @@ model Message {
   chatRoom ChatRoom @relation(fields: [chatRoomId],references: [id],onDelete: Cascade)
   chatRoomId String
   message String  
+  // هنسبهم لكن فعليا احنا لغينا وظيفتهم فرونت وباك 
   isRead Boolean @default(false)
   isDelivered Boolean @default(false)
   createdAt   DateTime @default(now())
@@ -224,6 +229,7 @@ model Notification {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   @@index([userId, isRead])
+  @@index([id,userId])
   @@index([userId, createdAt]) 
 }
 model Announcement {
@@ -238,23 +244,13 @@ model Announcement {
   priority        Int      @default(0)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-
-}
-model PushToken {
-  id        String   @id @default(cuid())
-  token     String   @unique
-  createdAt DateTime @default(now())
-  
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
+  @@index([priority (sort: Desc), createdAt (sort: Desc)])
 }
 
 // لازم اي منتج اعملو لازم اكتب هو يندرج تحت اي قسم 
 
 // catagory & subCategory
-
+// شوف الفهرسه هنا ضروري لان هنا علاقه ذاتيه
 model Category {
   id        String     @id @default(cuid())
   name      String
@@ -268,6 +264,7 @@ model Category {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   @@index([parentId])
+  @@index([name])
 }
 
 model Product {
@@ -298,7 +295,6 @@ model Product {
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
   @@index([subCategoryId, createdAt(sort: Desc)])
-  @@index([slug])
 }
 model Comment {
   id        String   @id @default(cuid())
@@ -310,8 +306,9 @@ model Comment {
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  @@index([productId])
-  @@index([rating, createdAt(sort: Desc)])
+  @@index([productId,createdAt(sort: Desc)])
+  @@index([id,userId])
+  @@index([rating,createdAt(sort: Desc)])
 }
 model Order {
   id        String   @id @default(cuid())
@@ -325,7 +322,7 @@ model Order {
   updatedAt   DateTime @updatedAt
   @@index([userId]) 
   @@index([status])
-  @@index([createdAt])
+  @@index([status,createdAt(sort: Desc)])
 }
 
 model OrderItem {
@@ -354,7 +351,7 @@ model Coupon {
   active        Boolean     @default(true)
   // العلاقة مع الجدول الوسيط
   usedBy        UserCoupon[] 
-
+@@index([code])
 }
 
 model UserCoupon {
@@ -375,9 +372,12 @@ model Favorite {
   
   product Product @relation(fields: [productId],references: [id],onDelete: Cascade)
   productId String
-@@unique([userId,productId])
  createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+@@unique([userId,productId])
+@@index([userId])
+@@index([productId])
 }
 
 model Cart {
@@ -391,8 +391,20 @@ userId String
 //  لما اعمل انكلود الاي ده يخليني اجيب كل تفاصيل المنتج 
   productId String
 @@unique([userId,productId,size])
+@@index([userId])
+@@index([productId])
  createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model CalendarEvent {
+  id        String   @id @default(cuid()) // أو uuid() حسب تفضيلك
+  title     String
+  start     DateTime
+  end       DateTime
+  allDay    Boolean  @default(false)
+  color     String?  @default("#007bff") // لون افتراضي (مثلاً اخضر Tailwind)
+  createdAt DateTime @default(now())
 }
 
 
@@ -447,3 +459,4 @@ model ChartAnalyticsByday {
 @@index([chartAnalyticsByMonthId, createdAt])
 @@unique([chartAnalyticsByMonthId, createdAt])
 }
+
