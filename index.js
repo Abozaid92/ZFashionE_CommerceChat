@@ -6,6 +6,7 @@ const express = require("express"); // 1. ضفنا ده
 const helmet = require("helmet"); // 2. ضفنا ده
 const redis = require("./redisClient"); // استدعاء الملف اللي عملناه
 const app = express(); // 3. عملنا "تطبيق" إكسبريس عشان يشيل الحماية
+const frontEndUrl = process.env.FRONTEND_URL || "http://localhost:3000"; // تأكد من وجود متغير البيئة أو استخدم القيمة الافتراضية
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
@@ -13,8 +14,8 @@ app.use(
       // السماح لاتصال السوكيت بالعمل
       connectSrc: [
         "'self'",
-        "ws://localhost:3000",
-        "http://localhost:3000",
+        frontEndUrl,
+        frontEndUrl.replace("http", "ws"),
         "ws://localhost:5000",
         "http://localhost:5000",
       ],
@@ -28,7 +29,7 @@ const httpServer = createServer(app);
 const io = new Server(httpServer, {
   pingTimeout: 50000,
   cors: {
-    origin: "http://localhost:3000",
+    origin: `${frontEndUrl}`,
     methods: ["GET", "POST"],
   },
 });
@@ -72,7 +73,11 @@ const setUserConnection = async (socketId, userId) => {
     // await redis.expire(`user_connection:${userId}`, 7200);
   } catch (e) {}
 };
-// في آخر الملف خالص عندك
+
+//  عشان الاستضافه تتاكد ان السيرفر شغال
+app.get("/", (req, res) => {
+  res.send("Brand Store Server is Live! 🚀");
+});
 const PORT = process.env.PORT || 5000;
 httpServer.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
