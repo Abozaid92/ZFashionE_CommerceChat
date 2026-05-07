@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "prisma generate && npm run custom-build",
-    "custom-build": "echo 'Build complete'",
-    "start": "node index.js"
+    "build": "prisma generate",
+    "start": "node index.js",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
