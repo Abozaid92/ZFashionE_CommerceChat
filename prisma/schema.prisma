@@ -7,6 +7,7 @@
 generator client {
   provider = "prisma-client-js"
   runtime  = "vercel-edge"
+  binaryTargets = ["native", "rhel-debian-node-18.x"]
 }
 
 datasource db {

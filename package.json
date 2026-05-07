@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "postinstall": "prisma generate",
+    "vercel-build": "prisma generate",
     "build": "prisma generate",
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",
