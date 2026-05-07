@@ -5,10 +5,10 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
-  // runtime  = "vercel-edge"
+  provider      = "prisma-client-js"
   binaryTargets = ["native"]
 }
+  // runtime  = "vercel-edge"
 
 datasource db {
   provider = "postgresql"
