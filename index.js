@@ -79,7 +79,7 @@ app.get("/", (req, res) => {
   res.send("Brand Store Server is Live! 🚀");
 });
 const PORT = process.env.PORT || 5000;
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
